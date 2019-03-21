@@ -44,16 +44,14 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "HAL_LCD_MT_12864A.h"
-#include "LibSym.h"
-#include "math.h"
 #include "usbd_cdc_if.h"
+#include "LibSym.h"
 #include "ADS1220.h"
+#include "LCD12864MT.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -70,381 +68,6 @@
 SPI_HandleTypeDef hspi2;
 
 /* USER CODE BEGIN PV */
-void LcdByte(uint32_t byte)
-{
-	GPIOA->ODR |= byte>>11;
-	byte &=(uint32_t)0x7FFF;
-	GPIOA->ODR |=(byte>>10)<<1;
-	byte &=(uint32_t)0x3FFF;
-	GPIOB->ODR |=(byte>>9)<<11;
-	byte &=(uint32_t)0x1FFF;
-	GPIOB->ODR |=(byte>>8)<<10;
-	byte &=(uint32_t)0x0FF;
-	GPIOB->ODR |=(byte>>7)<<2;
-	byte &=(uint32_t)0x07F;
-	GPIOB->ODR |=(byte>>6)<<1;
-	byte &=(uint32_t)0x03F;
-	GPIOB->ODR |=(byte>>5);
-	byte &=(uint32_t)0x01F;
-	GPIOA->ODR |=byte<<3;	 
-	
-	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_2,GPIO_PIN_SET);    // Выставляем Е
-	for (int i=0;i!=100;i++){}
-	//HAL_Delay(1);			   	// Пауза 1 мкс
-	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_2,GPIO_PIN_RESET);	// Сбрасываем Е		   	// Пауза 1 мкс
-	
-	byte = 0x0000;
-	GPIOA->ODR &= byte>>11;
-	byte &=(uint32_t)0x7FFF;
-	GPIOA->ODR &=(byte>>10)<<1;
-	byte &=(uint32_t)0x3FFF;
-	GPIOB->ODR &=(byte>>9)<<11;
-	byte &=(uint32_t)0x1FFF;
-	GPIOB->ODR &=(byte>>8)<<10;
-	byte &=(uint32_t)0x0FF;
-	GPIOB->ODR &=(byte>>7)<<2;
-	byte &=(uint32_t)0x07F;
-	GPIOB->ODR &=(byte>>6)<<1;
-	byte &=(uint32_t)0x03F;
-	GPIOB->ODR &=(byte>>5);
-	byte &=(uint32_t)0x01F;
-	GPIOA->ODR &=byte<<3;
-}
-
-void LcdByteWO(uint32_t byte)
-{
-	GPIOA->ODR |= byte>>11;
-	byte &=(uint32_t)0x7FFF;
-	GPIOA->ODR |=(byte>>10)<<1;
-	byte &=(uint32_t)0x3FFF;
-	GPIOB->ODR |=(byte>>9)<<11;
-	byte &=(uint32_t)0x1FFF;
-	GPIOB->ODR |=(byte>>8)<<10;
-	byte &=(uint32_t)0x0FF;
-	GPIOB->ODR |=(byte>>7)<<2;
-	byte &=(uint32_t)0x07F;
-	GPIOB->ODR |=(byte>>6)<<1;
-	byte &=(uint32_t)0x03F;
-	GPIOB->ODR |=(byte>>5);
-	byte &=(uint32_t)0x01F;
-	GPIOA->ODR |=byte<<3;	 
-	
-	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_2,GPIO_PIN_SET);    // Выставляем Е
-	//HAL_Delay(1);			   	// Пауза 1 мкс
-	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_2,GPIO_PIN_RESET);	// Сбрасываем Е
-	
-	byte = 0x0000;
-	GPIOA->ODR &= byte>>11;
-	byte &=(uint32_t)0x7FFF;
-	GPIOA->ODR &=(byte>>10)<<1;
-	byte &=(uint32_t)0x3FFF;
-	GPIOB->ODR &=(byte>>9)<<11;
-	byte &=(uint32_t)0x1FFF;
-	GPIOB->ODR &=(byte>>8)<<10;
-	byte &=(uint32_t)0x0FF;
-	GPIOB->ODR &=(byte>>7)<<2;
-	byte &=(uint32_t)0x07F;
-	GPIOB->ODR &=(byte>>6)<<1;
-	byte &=(uint32_t)0x03F;
-	GPIOB->ODR &=(byte>>5);
-	byte &=(uint32_t)0x01F;
-	GPIOA->ODR &=byte<<3;
-}
-
-void SetPage(uint32_t code,uint8_t crystal)
-{
-	if (crystal ==1)
-	{
-		code |= 0x1B8;    // Побитное ИЛИ кода с командой в левый кристалл
-		LcdByte(code);
-	}
-	if (crystal ==2)
-	{
-		code |= 0x2B8;    // Побитное ИЛИ кода с командой в левый кристалл
-		LcdByte(code);
-	}
-}
-
-void SetAdress(uint32_t code,uint8_t crystal)
-{
-	if (crystal ==1)
-	{
-		code |= 0x140;    // Побитное ИЛИ кода с командой в левый кристалл
-		LcdByte(code);
-	}
-	if (crystal ==2)
-	{
-		code |= 0x240;    // Побитное ИЛИ кода с командой в левый кристалл
-		LcdByte(code);
-	}
-}
-
-void WData(uint32_t code,uint8_t crystal)
-{
-	if (crystal ==1)
-	{
-		code |= 0x900;    // Побитное ИЛИ кода с командой в левый кристалл
-		LcdByte(code);
-	}
-	if (crystal ==2)
-	{
-		code |= 0xA00;    // Побитное ИЛИ кода с командой в правый кристалл
-		LcdByte(code);
-	}
-}
-
-void RData (uint8_t crystal)
-{
-	if (crystal ==1)
-	{
-		LcdByte(0xB00);
-	}
-	if (crystal ==2)
-	{
-		LcdByte(0xE00);
-	}
-}
-
-void WCommand(uint32_t code,uint8_t crystal)
-{
-	if (crystal ==1)
-	{
-		code |= 0x100;    // Побитное ИЛИ кода с командой в левый кристалл
-		LcdByte(code);
-	}
-	if (crystal ==2)
-	{
-		code |= 0x200;    // Побитное ИЛИ кода с командой в правый кристалл
-		LcdByte(code);
-	}
-}
-
-void Status(uint8_t crystal)
-{ 
-	if (crystal == 1)
-	{
-		LcdByteWO((uint32_t)0x500);
-	}
-	if (crystal == 2)
-	{
-		LcdByteWO(0x0600);
-	}
-}
-
-void DisplaySw(uint8_t crystal,uint8_t state)
-{ 
-	if (state == 1)
-	{
-		if (crystal == 1)
-		{
-			LcdByte((uint32_t)0x13F);
-		}
-		if (crystal == 2)
-		{
-			LcdByte((uint32_t)0x23F);
-		}
-	}
-	if (state == 0)
-	{
-		if (crystal == 1)
-		{
-			LcdByte((uint32_t)0x13E);
-		}
-		if (crystal == 2)
-		{
-			LcdByte((uint32_t)0x23E);
-		}
-	}
-}
-
-void ClearLCD(uint8_t crystal)
-{
-	if (crystal == 0)
-	{
-		for (uint8_t j=0; j<8;j++)
-		{
-			SetPage((uint32_t)j,1);
-			SetPage((uint32_t)j,2);
-			SetAdress((uint32_t)0,1);
-			SetAdress((uint32_t)0,2);
-			for (uint8_t i=0;i<64;i++)
-			{
-				WData(0x00,1);
-				WData(0x00,2);
-			}
-		}
-	}
-	if (crystal == 1)
-	{
-		for (uint8_t j=0; j<8;j++)
-		{
-			SetPage((uint32_t)j,1);
-			SetAdress((uint32_t)0,1);
-			for (uint8_t i=0;i<64;i++)
-			{
-				WData(0x00,1);
-			}
-		}
-	}
-	if (crystal == 2)
-	{
-		for (uint8_t j=0; j<8;j++)
-		{
-			SetPage((uint32_t)j,2);
-			SetAdress((uint32_t)0,2);
-			for (uint8_t i=0;i<64;i++)
-			{
-				WData(0x00,2);
-			}
-		}
-	}
-}
-
-void WByte (uint8_t x,uint8_t y, uint8_t code)
-{
-	if (x<=64)
-	{
-		SetPage(y,1);
-		SetAdress(x,1);
-		WData(code,1);
-	}
-	if (x>64)
-	{
-		SetPage(y,2);
-		SetAdress(x-64,2);
-		WData(code,2);
-	}
-}
-
-void LcdInit(void)
-{
-	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_15,GPIO_PIN_RESET);    // Выставляем res
-	HAL_Delay(1);			   	// Пауза 1 мкс
-	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_15,GPIO_PIN_SET);	// Сбрасываем res
-	HAL_Delay(10);			   	// Пауза 1 мкс
-	DisplaySw(1,1);
-	DisplaySw(2,1);
-	ClearLCD(0);
-}
-
-void WSym (uint8_t x, uint8_t y, uint8_t symbol[6])
-{
-	if (x<=57)
-	{
-			SetPage(y,1);
-			SetAdress(x,1);
-			for (uint8_t j=0;j<6;j++)
-			{
-				WData(symbol[j],1);
-			}
-	}
-	if(x>=64)
-	{
-			SetPage(y,2);
-			SetAdress(x,2);
-			for (uint8_t j=0;j<=x;j++)
-			{
-				WData(symbol[j],2);
-			}
-	}
-}
-
-uint8_t SymC2Int (char ch)
-{
-	uint8_t n=0;
-	for (uint8_t j=0;j<strlen(codeSymR);j++)
-	{
-		if (ch==codeSymR[j])
-		{
-			n=j;
-			break;
-		}			
-	}
-	return(n);
-}
-
-void WStr(uint8_t x,uint8_t y,char str[])
-{
-	if (x<=57)
-	{
-		SetPage(y,1);
-		SetAdress(x,1);
-		for (uint8_t i=0;i<strlen(str);i++)
-		{
-			for (uint8_t j=0;j<sizeof(SmFR[SymC2Int(str[i])+96]);j++)
-			{
-				WData(SmFR[SymC2Int(str[i])+96][j],1);
-			}
-		}
-	}
-	if(x>=64)
-	{
-		SetPage(y,2);
-		SetAdress(x,2);
-		for (uint8_t j=0;j<6;j++)
-		{
-			for (uint8_t i=0;i<strlen(str);i++)
-			{
-				WData(SmFR[SymC2Int(str[i])+97][j],2);
-			}
-		}
-	}
-}
-
-void WNum (uint8_t x,uint8_t y, int32_t num)
-{
-	uint8_t m=0;
-	uint8_t minus = 0;
-	if (num<0) 
-		{
-			minus = 1;
-			num = abs(num);
-		}
-	int32_t n=num;
-	while(n!=0)
-	{
-		n = n/10;
-		m++;
-	}
-	if (x<=57)
-	{
-		SetPage(y,1);
-		SetAdress(x,1);
-		
-		if (minus == 1)
-		{
-			for (uint8_t j=0;j<6;j++)
-			{
-				WData(SmFR[29][j],1);
-			}
-		}			
-		
-		for (uint8_t i=m;i>0;i--)
-		{
-			n=num/(pow(10,i-1));
-			for (uint8_t j=0;j<6;j++)
-			{
-				WData(SmFR[n][j],1);
-			}
-			num=num%(uint32_t)(pow(10,i-1));
-		}
-		
-	}
-	/*
-	if(x>=64)
-	{
-		SetPage(y,2);
-		SetAdress(x,2);
-		for (uint8_t j=0;j<6;j++)
-		{
-			for (uint8_t i=0;i<m;i++)
-			{
-				WData(SmFR[n/(10*m)][j],2);
-			}
-		}
-	}
-	*/
-}
 
 /* USER CODE END PV */
 
@@ -453,7 +76,6 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI2_Init(void);
 /* USER CODE BEGIN PFP */
-
 
 /* USER CODE END PFP */
 
@@ -492,8 +114,8 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
-	LcdInit();
-	WStr(0,0,"Привет мир");
+	LCD_Init();
+	LCD_WStr(0,0,"Привет мир");
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -507,95 +129,42 @@ int main(void)
 		HAL_Delay(100);
 		if(HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_5))
 		{
-			for (int i=0;i<10000;i++)
-			{
-				WNum(0,1,i);
-			}
+
 		}
 		if(HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_4))
 		{
-			WSym(0,0,(uint8_t*)SmFR[161]);
-			HAL_Delay(10);
+ 
 		}
-		
 		if(HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_7))
 		{
-			CDC_Transmit_FS((uint8_t*)"2",1);
-			SetPage((uint32_t)0,1);
-			SetPage((uint32_t)0,2);
-			SetAdress((uint32_t)0,1);
-			SetAdress((uint32_t)0,2);
+
 		}
 		
 		if(HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_3))
 		{
-			CDC_Transmit_FS((uint8_t*)"3",1);
-			DisplaySw(1,0);
-			HAL_Delay(100);
+			
 		}
 		
 		if(HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_6))
 		{
 			ADS1220_Init();
 			ADS1220_SingleShot_Mode();
-			ADS1220_Set_Data_Rate(DR_1000SPS);
-			ADS1220_PGA_ON();
+
+			ADS1220_Set_Data_Rate(DR_600SPS);
+			ADS1220_PGA_OFF();
 			//ADS1220_Set_PGA_Gain(PGA_GAIN_1);
 			ADS1220_Volt_Ref(VOLT_REF_ANALOG);
 			while(1)
 			{
-				
 				ADS1220_Sel_MUX_ch(MUX_AIN3_AVSS);
-				WNum(0, 1, ADS1220_Read_Single_WaitForData());
+				LCD_WNum(0, 1, ADS1220_Read_Single_WaitForData());
 				ADS1220_Sel_MUX_ch(MUX_AIN2_AVSS);
-				WNum(0, 2, ADS1220_Read_Single_WaitForData());
+				LCD_WNum(0, 2, ADS1220_Read_Single_WaitForData());
 				ADS1220_Sel_MUX_ch(MUX_AIN1_AVSS);
-				WNum(0, 3, ADS1220_Read_Single_WaitForData());
+				LCD_WNum(0, 3, ADS1220_Read_Single_WaitForData());
 				
 				//HAL_Delay(10);
 			}
-			/*
-			uint8_t buf=0;
-			uint32_t bufarr=0;
-			uint8_t resp1=0;
-			uint8_t resp2=0;
-			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_RESET);
-			HAL_SPI_Transmit(&hspi2,(uint8_t*)0x06,1,10);//reset
-			HAL_Delay(100);
-			HAL_SPI_Transmit(&hspi2,(uint8_t*)0x43,1,10);//com wreg
-			HAL_SPI_Transmit(&hspi2,(uint8_t*)0xb8,1,10);//0reg b0
-			HAL_SPI_Transmit(&hspi2,(uint8_t*)0x04,1,10);//1reg 04
-			HAL_SPI_Transmit(&hspi2,(uint8_t*)0x10,1,10);//2reg 10
-			HAL_SPI_Transmit(&hspi2,(uint8_t*)0x00,1,10);//3reg 00
-			HAL_Delay(10);
-			HAL_SPI_Transmit(&hspi2,(uint8_t*)0x08,1,10);//start
-			HAL_Delay(10);
-			
-			NVIC_EnableIRQ (EXTI15_10_IRQn);
-			
-			while(1)
-			{
-				bufarr=0;
-				if(!HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_15))
-				{
-					HAL_Delay(10);
-					HAL_SPI_Receive(&hspi2,&buf,1,10);
-					bufarr =buf;
-					HAL_SPI_Receive(&hspi2,&buf,1,10);
-					bufarr +=buf<<8;
-					HAL_SPI_Receive(&hspi2,&buf,1,10);
-					bufarr +=buf<<16;
-					HAL_Delay(5);
-					WNum(0,1,bufarr);
-					HAL_SPI_Transmit(&hspi2,(uint8_t*)0x10,1,10);
-					CDC_Transmit_FS((uint8_t*)&bufarr,3);
-					HAL_Delay(100);
-					WStr(0,1,"             ");
-					CDC_Transmit_FS((uint8_t*)"321",1);
-				}
-				__nop();
-			}
-			*/
 		}
   }
   /* USER CODE END 3 */
@@ -666,7 +235,7 @@ static void MX_SPI2_Init(void)
   hspi2.Init.Direction = SPI_DIRECTION_2LINES;
   hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi2.Init.CLKPhase = SPI_PHASE_2EDGE;
+  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi2.Init.NSS = SPI_NSS_SOFT;
   hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;

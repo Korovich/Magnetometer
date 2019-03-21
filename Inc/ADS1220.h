@@ -80,13 +80,14 @@ void ADS1220_Init(void);
 void ADS1220_Start(void);
 void ADS1220_Reset(void);
 
-void ADS1220_Command(unsigned char data_in);
-void ADS1220_WriteRegister(uint8_t address, uint8_t *value);
-uint8_t ADS1220_ReadRegister(uint8_t address);
+//void ADS1220_Command(unsigned char data_in);
+//void ADS1220_WriteRegister(uint8_t address, uint8_t *value);
+//uint8_t ADS1220_ReadRegister(uint8_t address);
 //uint8_t * Read_Data(void);
-int32_t ADS1220_Read_WaitForData();
+int32_t ADS1220_Read_WaitForData(void); //
+int32_t ADS1220_Read_Single_WaitForData(void); //
 
-uint8_t * ADS1220_Get_Config_REG(void);
+//uint8_t * ADS1220_Get_Config_REG(void);
 void ADS1220_Volt_Ref (uint8_t Ref);
 void ADS1220_PGA_OFF(void);
 void ADS1220_PGA_ON(void);
@@ -96,10 +97,9 @@ void ADS1220_Set_Data_Rate(int datarate);
 void ADS1220_Set_PGA_Gain(int pgagain);
 void ADS1220_Sel_MUX_ch(int channels_conf);
 void set_conv_mode_single_shot(void);
-int32_t ADS1220_Read_Single_WaitForData();
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __USBD_CDC_IF_H__ */
+#endif /* __ADS1220_H__*/

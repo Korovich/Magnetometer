@@ -164,7 +164,7 @@ uint8_t * ADS1220_Get_Config_REG()
     return config_Buff;
 }
 
-int32_t ADS1220_Read_WaitForData()
+int32_t ADS1220_Read_WaitForData(void)
 {
 	static uint8_t SPI_Buf[3];
 	int32_t mResult32=0;
@@ -186,11 +186,10 @@ int32_t ADS1220_Read_WaitForData()
 	return mResult32;
 }
 
-int32_t ADS1220_Read_Single_WaitForData()
+int32_t ADS1220_Read_Single_WaitForData(void)
 {
 	static uint8_t SPI_Buf[3];
 	int32_t mResult32=0;
-	long int bit24;
 	
 	ADS1220_Start();
 	while(1)
@@ -198,12 +197,12 @@ int32_t ADS1220_Read_Single_WaitForData()
 		if(HAL_GPIO_ReadPin(GPIO_DRDY_TYPE,GPIO_DRDY_PIN) == GPIO_PIN_RESET)
 		{
 			HAL_GPIO_WritePin(GPIO_RES_TYPE,GPIO_RES_PIN,GPIO_PIN_RESET);
-			HAL_Delay(100);
+			HAL_Delay(10);
 			for (uint8_t i=0;i<3;i++)
 			{
 				HAL_SPI_Receive(&hspi2,&SPI_Buf[i],1,Timeout_Talk);
 			}
-			HAL_Delay(100);
+			HAL_Delay(10);
 			HAL_GPIO_WritePin(GPIO_RES_TYPE,GPIO_RES_PIN,GPIO_PIN_SET);
 			
 			mResult32 |= SPI_Buf[2];

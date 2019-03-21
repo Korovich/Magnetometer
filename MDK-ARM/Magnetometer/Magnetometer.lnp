@@ -1,5 +1,8 @@
 --cpu Cortex-M3
 "magnetometer\startup_stm32f103xb.o"
+"magnetometer\ads1220.o"
+"magnetometer\lcd12864mt.o"
+"magnetometer\libsym.o"
 "magnetometer\main.o"
 "magnetometer\usb_device.o"
 "magnetometer\usbd_conf.o"
@@ -7,7 +10,6 @@
 "magnetometer\usbd_cdc_if.o"
 "magnetometer\stm32f1xx_it.o"
 "magnetometer\stm32f1xx_hal_msp.o"
-"magnetometer\ads1220.o"
 "magnetometer\stm32f1xx_hal_gpio_ex.o"
 "magnetometer\stm32f1xx_hal_pcd.o"
 "magnetometer\stm32f1xx_hal_pcd_ex.o"
