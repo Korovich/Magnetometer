@@ -147,24 +147,36 @@ int main(void)
 		
 		if(HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_6))
 		{
+			int i;
+			i=0;
 			ADS1220_Init();
-			ADS1220_SingleShot_Mode();
-
-			ADS1220_Set_Data_Rate(DR_600SPS);
-			ADS1220_PGA_OFF();
-			//ADS1220_Set_PGA_Gain(PGA_GAIN_1);
+			ADS1220_Set_Data_Rate(DR_20SPS);
 			ADS1220_Volt_Ref(VOLT_REF_ANALOG);
+			ADS1220_PGA_OFF();
+			ADS1220_SingleShot_Mode();
 			while(1)
 			{
-				ADS1220_Sel_MUX_ch(MUX_AIN3_AVSS);
-				LCD_WNum(0, 1, ADS1220_Read_Single_WaitForData());
-				ADS1220_Sel_MUX_ch(MUX_AIN2_AVSS);
-				LCD_WNum(0, 2, ADS1220_Read_Single_WaitForData());
-				ADS1220_Sel_MUX_ch(MUX_AIN1_AVSS);
-				LCD_WNum(0, 3, ADS1220_Read_Single_WaitForData());
+				/*
+				ADS1220_Sel_MUX_ch(MUX_SE_CH1);
+				ADS1220_Start();
+				LCD_WNum(0,2,ADS1220_Read_WaitForData());
 				
-				//HAL_Delay(10);
+				ADS1220_Sel_MUX_ch(MUX_SE_CH2);
+				ADS1220_Start();
+				LCD_WNum(0,3,ADS1220_Read_WaitForData());
+				
+				ADS1220_Sel_MUX_ch(MUX_SE_CH3);
+				ADS1220_Start();
+				LCD_WNum(0,4,ADS1220_Read_WaitForData());
+				*/
+				HAL_Delay(100);
+				ADS1220_Sel_MUX_ch(MUX_SE_CH3);
+				LCD_WStr(0,2,"          ");
+				LCD_WNum(0, 2, ADS1220_Read_Single_WaitForData());
+				i++;
+				LCD_WNum(0,5,i);
 			}
+			LCD_WStr(0,1,"         ");
 		}
   }
   /* USER CODE END 3 */
@@ -235,7 +247,7 @@ static void MX_SPI2_Init(void)
   hspi2.Init.Direction = SPI_DIRECTION_2LINES;
   hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi2.Init.CLKPhase = SPI_PHASE_2EDGE;
   hspi2.Init.NSS = SPI_NSS_SOFT;
   hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;

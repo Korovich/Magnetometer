@@ -3,7 +3,7 @@
 <title>Static Call Graph - [Magnetometer\Magnetometer.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image Magnetometer\Magnetometer.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Thu Mar 21 11:50:22 2019
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Mon Apr 01 16:57:24 2019
 <BR><P>
 <H3>Maximum Stack Usage =        272 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -492,10 +492,11 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[66]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ADS1220_Init
 </UL>
 
-<P><STRONG><a name="[6c]"></a>ADS1220_Read_Single_WaitForData</STRONG> (Thumb, 144 bytes, Stack size 24 bytes, ads1220.o(i.ADS1220_Read_Single_WaitForData))
+<P><STRONG><a name="[6c]"></a>ADS1220_Read_Single_WaitForData</STRONG> (Thumb, 158 bytes, Stack size 24 bytes, ads1220.o(i.ADS1220_Read_Single_WaitForData))
 <BR><BR>[Stack]<UL><LI>Max Depth = 144<LI>Call Chain = ADS1220_Read_Single_WaitForData &rArr; HAL_SPI_Receive &rArr; HAL_SPI_TransmitReceive &rArr; SPI_CheckFlag_BSY &rArr; SPI_WaitFlagStateUntilTimeout
 </UL>
-<BR>[Calls]<UL><LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_SPI_Receive
+<BR>[Calls]<UL><LI><a href="#[65]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_SPI_Transmit
+<LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_SPI_Receive
 <LI><a href="#[63]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
 <LI><a href="#[6d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_ReadPin
 <LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Delay
@@ -956,6 +957,7 @@ Global Symbols
 <LI><a href="#[7a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
 </UL>
 <BR>[Called By]<UL><LI><a href="#[67]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ADS1220_WriteRegister
+<LI><a href="#[6c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ADS1220_Read_Single_WaitForData
 <LI><a href="#[68]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ADS1220_ReadRegister
 <LI><a href="#[62]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ADS1220_Command
 </UL>
@@ -1692,7 +1694,7 @@ Global Symbols
 <LI><a href="#[c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pow
 </UL>
 
-<P><STRONG><a name="[4a]"></a>main</STRONG> (Thumb, 180 bytes, Stack size 0 bytes, main.o(i.main))
+<P><STRONG><a name="[4a]"></a>main</STRONG> (Thumb, 170 bytes, Stack size 0 bytes, main.o(i.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 272<LI>Call Chain = main &rArr; LCD_WNum &rArr; pow &rArr; __kernel_poly &rArr; __aeabi_dmul &rArr; _double_epilogue &rArr; _double_round
 </UL>
 <BR>[Calls]<UL><LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_USB_DEVICE_Init

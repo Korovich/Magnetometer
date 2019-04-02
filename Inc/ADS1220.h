@@ -16,6 +16,7 @@
 #define Timeout_Talk (uint8_t)10
 
 #define SPI_MASTER_DUMMY    0xFF
+#define RDATA 							0x10
 #define RESET               0x06    //Send the RESET command (06h) to make sure the ADS1220 is properly reset after power-up
 #define START               0x08    //Send the START/SYNC command (08h) to start converting in continuous conversion mode
 #define WREG  0x40
