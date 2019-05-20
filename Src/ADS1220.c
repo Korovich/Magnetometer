@@ -10,6 +10,27 @@ uint8_t Config_Reg1;
 uint8_t Config_Reg2;
 uint8_t Config_Reg3;
  
+int ADS1220WaitForDataReady(int Timeout)
+{
+   if (Timeout > 0)
+   {
+      /* wait for /DRDY = 1 */
+      while (!(HAL_GPIO_ReadPin(GPIO_DRDY_TYPE,GPIO_DRDY_PIN) == GPIO_PIN_RESET) && (Timeout-- >= 0));
+      /* wait for /DRDY = 0 */
+      while ( (HAL_GPIO_ReadPin(GPIO_DRDY_TYPE,GPIO_DRDY_PIN) == GPIO_PIN_RESET) && (Timeout-- >= 0))         ;
+      if (Timeout < 0)
+         return 0; /* ADS1220_TIMEOUT_WARNING; */
+   }
+   else
+   {
+      /* wait for /DRDY = 1 */
+      while (!(HAL_GPIO_ReadPin(GPIO_DRDY_TYPE,GPIO_DRDY_PIN) == GPIO_PIN_RESET));
+      /* wait for /DRDY = 0 */
+      while ( (HAL_GPIO_ReadPin(GPIO_DRDY_TYPE,GPIO_DRDY_PIN) == GPIO_PIN_RESET));
+   }
+   return ADS1220_NO_ERROR;
+}
+ 
 void ADS1220_WriteRegister (uint8_t address, uint8_t *value)
 {
 	uint8_t buf = WREG | (address << 2);
@@ -171,21 +192,18 @@ int32_t ADS1220_Read_WaitForData(void)
 	
 	while(HAL_GPIO_ReadPin(GPIO_DRDY_TYPE,GPIO_DRDY_PIN) == GPIO_PIN_SET)
 	
-	//if(HAL_GPIO_ReadPin(GPIO_DRDY_TYPE,GPIO_DRDY_PIN) == GPIO_PIN_RESET)
-	//{
-		ADS1220_Command(RDATA);
-		HAL_GPIO_WritePin(GPIO_RES_TYPE,GPIO_RES_PIN,GPIO_PIN_RESET);
-		HAL_Delay(10);
-		for (uint8_t i=0;i<3;i++)
-		{
-			HAL_SPI_Receive(&hspi2,&SPI_Buf[i],1,Timeout_Talk);
-		}
-		HAL_Delay(10);
-		HAL_GPIO_WritePin(GPIO_RES_TYPE,GPIO_RES_PIN,GPIO_PIN_SET);
-		mResult32 |= SPI_Buf[2];
-		mResult32 |= SPI_Buf[1]<<8;
-		mResult32 |= SPI_Buf[0]<<16;
-	//}
+	ADS1220_Command(RDATA);
+	HAL_GPIO_WritePin(GPIO_RES_TYPE,GPIO_RES_PIN,GPIO_PIN_RESET);
+	HAL_Delay(10);
+	for (uint8_t i=0;i<3;i++)
+	{
+		HAL_SPI_Receive(&hspi2,&SPI_Buf[i],1,Timeout_Talk);
+	}
+	HAL_Delay(10);
+	HAL_GPIO_WritePin(GPIO_RES_TYPE,GPIO_RES_PIN,GPIO_PIN_SET);
+	mResult32 |= SPI_Buf[2];
+	mResult32 |= SPI_Buf[1]<<8;
+	mResult32 |= SPI_Buf[0]<<16;
 	return mResult32;
 }
 
@@ -195,46 +213,24 @@ int32_t ADS1220_Read_Single_WaitForData(void)
 	int32_t mResult32=0;
 	
 	ADS1220_Start();
-	while(1)
+	
+	while(HAL_GPIO_ReadPin(GPIO_DRDY_TYPE,GPIO_DRDY_PIN) == GPIO_PIN_SET){}
+	
+	HAL_Delay(RDATA_TIMEOUT);
+	ADS1220_Command(RDATA);
+		
+	//HAL_SPI_Transmit(&hspi2,0x00,1,Timeout_Talk);
+	for (uint8_t i=0;i<3;i++)
 	{
-		if(HAL_GPIO_ReadPin(GPIO_DRDY_TYPE,GPIO_DRDY_PIN) == GPIO_PIN_RESET)
-		{
-			HAL_GPIO_WritePin(GPIO_RES_TYPE,GPIO_RES_PIN,GPIO_PIN_RESET);
-			HAL_Delay(10);
-			HAL_SPI_Transmit(&hspi2,0x00,1,Timeout_Talk);
-			for (uint8_t i=0;i<3;i++)
-			{
-				HAL_SPI_Receive(&hspi2,&SPI_Buf[i],1,Timeout_Talk);
-			}
-			HAL_Delay(10);
-			HAL_GPIO_WritePin(GPIO_RES_TYPE,GPIO_RES_PIN,GPIO_PIN_SET);
-			
-			mResult32 = SPI_Buf[0];
-			mResult32 = (mResult32 << 8) |SPI_Buf[1];
-			mResult32 = (mResult32 << 8) |SPI_Buf[2];
- 
-			// sign extend data
-			if (mResult32 & 0x800000)
-					mResult32 |= 0xff000000;
-			
-			//mResult32 |= SPI_Buf[2];
-			//mResult32 |= SPI_Buf[1]<<8;
-			//mResult32 |= SPI_Buf[0]<<16; 
-			
-/*
-			bit24 = SPI_Buf[0];
-      bit24 = (bit24 << 8) | SPI_Buf[1];
-      bit24 = (bit24 << 8) | SPI_Buf[2];                                 // Converting 3 bytes to a 24 bit int
-
-      bit24 = ( bit24 << 8 );
-      mResult32 = ( bit24 >> 8 ); 
-			*/
-			CDC_Transmit_FS(&SPI_Buf[0],3);
-			CDC_Transmit_FS(&SPI_Buf[1],2);
-			CDC_Transmit_FS(&SPI_Buf[2],1);
-			break;
-		}
-		__nop();
+		HAL_SPI_Receive(&hspi2,&SPI_Buf[i],1,Timeout_Talk);
 	}
+			
+	mResult32 = SPI_Buf[0];
+	mResult32 = (mResult32 << 8) |SPI_Buf[1];
+	mResult32 = (mResult32 << 8) |SPI_Buf[2];
+ 
+	// sign extend data
+	if (mResult32 & 0x800000)
+			mResult32 |= 0xff000000;
 	return mResult32;
 }

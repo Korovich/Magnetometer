@@ -12,8 +12,10 @@
 #define GPIO_RES_PIN GPIO_PIN_12
 #define GPIO_DRDY_TYPE GPIOA
 #define GPIO_DRDY_PIN GPIO_PIN_15
+#define ADS1220_NO_ERROR 0x00	 
 	 
 #define Timeout_Talk (uint8_t)10
+#define RDATA_TIMEOUT (uint8_t)1
 
 #define SPI_MASTER_DUMMY    0xFF
 #define RDATA 							0x10
@@ -81,7 +83,7 @@ void ADS1220_Init(void);
 void ADS1220_Start(void);
 void ADS1220_Reset(void);
 
-//void ADS1220_Command(unsigned char data_in);
+void ADS1220_Command(unsigned char data_in);
 //void ADS1220_WriteRegister(uint8_t address, uint8_t *value);
 //uint8_t ADS1220_ReadRegister(uint8_t address);
 //uint8_t * Read_Data(void);
@@ -89,6 +91,7 @@ int32_t ADS1220_Read_WaitForData(void); //
 int32_t ADS1220_Read_Single_WaitForData(void); //
 
 //uint8_t * ADS1220_Get_Config_REG(void);
+int ADS1220WaitForDataReady(int Timeout);
 void ADS1220_Volt_Ref (uint8_t Ref);
 void ADS1220_PGA_OFF(void);
 void ADS1220_PGA_ON(void);

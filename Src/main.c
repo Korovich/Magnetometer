@@ -150,12 +150,50 @@ int main(void)
 			int i;
 			i=0;
 			ADS1220_Init();
-			ADS1220_Set_Data_Rate(DR_20SPS);
-			ADS1220_Volt_Ref(VOLT_REF_ANALOG);
+			ADS1220_Set_Data_Rate(DR_1000SPS);
+			ADS1220_Volt_Ref(VOLT_REF_EXT_REF);
 			ADS1220_PGA_OFF();
 			ADS1220_SingleShot_Mode();
+			//ADS1220_Contnuous_Mode();
 			while(1)
 			{
+				//LCD_WStr(0,2,"          ");
+				ADS1220_Sel_MUX_ch(MUX_SE_CH1);
+				LCD_WNum(0,2,(ADS1220_Read_Single_WaitForData()/1.67));
+				ADS1220_Sel_MUX_ch(MUX_SE_CH2);
+				LCD_WNum(0,3,(ADS1220_Read_Single_WaitForData()/1.67));
+				ADS1220_Sel_MUX_ch(MUX_SE_CH3);
+				LCD_WNum(0,4,(ADS1220_Read_Single_WaitForData()/1.67));
+				i++;
+				LCD_WNum(0,5,i);
+				
+				/*
+				ADS1220_Start();
+				//ADS1220WaitForDataReady(0);
+				while ( (HAL_GPIO_ReadPin(GPIO_DRDY_TYPE,GPIO_DRDY_PIN) == GPIO_PIN_RESET))
+				//ADS1220_Start();
+				HAL_Delay(10);
+				ADS1220_Command(RDATA);
+				//HAL_GPIO_WritePin(GPIO_RES_TYPE,GPIO_RES_PIN,GPIO_PIN_RESET);
+				//HAL_Delay(10);
+				for (uint8_t i=0;i<3;i++)
+				{
+					HAL_SPI_Receive(&hspi2,&SPI_Buf[i],1,Timeout_Talk);
+				}
+				//HAL_Delay(10);
+				//HAL_GPIO_WritePin(GPIO_RES_TYPE,GPIO_RES_PIN,GPIO_PIN_SET);
+				mResult32 = SPI_Buf[0];
+				mResult32 = (mResult32<<8) | SPI_Buf[1];
+				mResult32 = (mResult32<<8) | SPI_Buf[2];
+				
+				if (mResult32 & 0x800000)
+					mResult32 |= 0xff000000;
+				
+				LCD_WStr(0,2,"          ");
+				LCD_WNum(0,2,mResult32);
+				mResult32 = 0;
+				i++;
+				LCD_WNum(0,5,i);*/
 				/*
 				ADS1220_Sel_MUX_ch(MUX_SE_CH1);
 				ADS1220_Start();
@@ -168,15 +206,15 @@ int main(void)
 				ADS1220_Sel_MUX_ch(MUX_SE_CH3);
 				ADS1220_Start();
 				LCD_WNum(0,4,ADS1220_Read_WaitForData());
-				*/
-				HAL_Delay(100);
+				
 				ADS1220_Sel_MUX_ch(MUX_SE_CH3);
 				LCD_WStr(0,2,"          ");
 				LCD_WNum(0, 2, ADS1220_Read_Single_WaitForData());
 				i++;
 				LCD_WNum(0,5,i);
 			}
-			LCD_WStr(0,1,"         ");
+				*/
+			}
 		}
   }
   /* USER CODE END 3 */
@@ -248,8 +286,8 @@ static void MX_SPI2_Init(void)
   hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi2.Init.CLKPhase = SPI_PHASE_2EDGE;
-  hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+  hspi2.Init.NSS = SPI_NSS_HARD_OUTPUT;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -290,9 +328,6 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_10 
                           |GPIO_PIN_11, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
-
   /*Configure GPIO pin : PC15 */
   GPIO_InitStruct.Pin = GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -318,17 +353,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PB12 */
-  GPIO_InitStruct.Pin = GPIO_PIN_12;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
   /*Configure GPIO pin : PA15 */
   GPIO_InitStruct.Pin = GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB3 PB4 PB5 PB6 
